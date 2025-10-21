@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Resume Classifier</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- DM Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Keep same stylesheet link (Flask Jinja) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <!-- Topbar -->
+    <header class="topbar">
+        <div class="left-top">
+            <div class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="brand">Resume Classifier</div>
+        </div>
+
+        <div class="search-wrap" role="search" aria-label="Site search">
+            <input type="search" placeholder="Search for orders, products, customers..." aria-label="search">
+            <button class="btn-ghost" aria-label="search button"><i class="fas fa-search"></i></button>
+        </div>
+
+        <div class="right-top">
+            <button class="profile-btn" title="Notifications" aria-label="notifications">
+                <i class="fas fa-bell"></i>
+            </button>
+            <div class="avatar" title="User">KS</div>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+        <div class="sidebar-inner">
+            <div class="outlet">Outlet 1</div>
+            <ul>
+                <li><a href="#upload">📄 Upload</a></li>
+                <li><a href="#insights">📊 Insights</a></li>
+                <li><a href="#matchscore">🎯 Match Score</a></li>
+                <li><a href="#recommendation">💡 Role Suggestion</a></li>
+                <li><a href="#tips">🧠 Smart Tips</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" class="small-link">Settings</a>
+                <a href="#" class="small-link">Log out</a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main" id="main-container">
+        <div class="grid">
+
+            <!-- Upload Section -->
+            <section class="panel card-large" id="upload">
+                <div class="card-header">
+                    <h2>🔍 Upload Resume</h2>
+                </div>
+
+                <div class="card-body">
+                    <form action="{{ url_for('index') }}" method="post" enctype="multipart/form-data" onsubmit="showLoader()">
+                        <label for="resume-file" style="display: none;">Upload your resume</label>
+                        <input type="file" name="resume" id="resume-file" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                        <button type="submit" class="primary-btn">Analyze Resume</button>
+                    </form>
+
+                    <div id="loading-container" class="loading-wrap" style="display:none;">
+                        <div class="loading-bar">
+                            <div class="loading-fill"></div>
+                        </div>
+                        <p class="muted">Analyzing your resume...</p>
+                    </div>
+
+                    <p class="muted small">
+                        Supported formats: PDF, DOCX, JPG, JPEG, PNG (DOCX/Image parsing is a future enhancement)
+                    </p>
+                </div>
+            </section>
+
+            {% if prediction %}
+            <!-- Insights Section -->
+            <section class="panel card-stats" id="insights">
+                <div class="chip">📊 Resume Insights</div>
+                <div class="card-body">
+                    <p><strong>Total Words:</strong> {{ total_words }}</p>
+                    <p><strong>Keyword Density (Python):</strong> {{ keyword_density }}%</p>
+
+                    {% if skill_chart %}
+                    <h4 class="sub">Your Skills Overview:</h4>
+                    <img class="chart-img" src="data:image/png;base64,{{ skill_chart }}" alt="Skill Chart">
+                    {% else %}
+                    <p>No skills detected or chart could not be generated.</p>
+                    {% endif %}
+
+                    <p class="muted small">
+                        *More detailed insights (e.g., missing skills, education/experience graphs) are under development.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Match Score Section -->
+            <section class="panel card-small" id="matchscore">
+                <div class="chip">🎯 Skill-Job Match Score</div>
+                <div class="card-body">
+                    <p>Your resume matches this role <strong>{{ match_score }}%</strong></p>
+                    <p class="muted small">(Based on a dummy Python Developer job description)</p>
+                </div>
+            </section>
+
+            <!-- Recommendation Section -->
+            <section class="panel card-small" id="recommendation">
+                <div class="chip">💡 Recommended Job Roles</div>
+                <div class="card-body">
+                    {% if recommended_roles %}
+                    <ul>
+                        {% for role in recommended_roles %}
+                        <li>{{ role }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>No specific roles recommended based on detected skills. Try adding more relevant keywords!</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Tips Section -->
+            <section class="panel card-small" id="tips">
+                <div class="chip">🧠 Resume Improvement Tips</div>
+                <div class="card-body">
+                    {% if smart_tips %}
+                    <ul>
+                        {% for tip in smart_tips %}
+                        <li>{{ tip }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>Your resume looks great! Keep up the good work.</p>
+                    {% endif %}
+                </div>
+            </section>
+            {% endif %}
+
+        </div>
+    </main>
+
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            document.body.classList.toggle('sidebar-active');
+        });
+
+        // Close sidebar when a link is clicked (for better mobile UX)
+        document.querySelectorAll('.sidebar ul li a').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                document.body.classList.remove('sidebar-active');
+            });
+        });
+
+        function showLoader() {
+            document.getElementById("loading-container").style.display = "block";
+        }
+    </script>
+
+</body>
+
+</html>
