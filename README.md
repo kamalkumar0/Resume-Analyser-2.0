@@ -1,18 +1,3 @@
----
-title: Resume Analyser2.0
-emoji: 👀
-colorFrom: red
-colorTo: pink
-sdk: docker
-pinned: false
-license: apache-2.0
-short_description: This is simple prediction model based Flask app.
----
-
-Here’s a professional-style README file in English for your project **Resume Analyser 2.0** (built with Flask). You can copy this into your repository and adjust any sections as needed.
-
----
-
 # Resume Analyser 2.0
 
 Live demo: [https://huggingface.co/spaces/kamalsharma0/Resume_Analyser2.0](https://huggingface.co/spaces/kamalsharma0/Resume_Analyser2.0)
